@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   AlertCircleIcon,
   CopyIcon,
@@ -48,6 +48,7 @@ export function Converter() {
   const [customPrompt, setCustomPrompt] = useState("");
   const [lastUrl, setLastUrl] = useState("");
 
+  const runId = useRef(0);
   const loading = status.kind === "loading";
 
   async function convert(raw: string) {
@@ -59,6 +60,7 @@ export function Converter() {
     }
     setUrlError("");
     setLastUrl(check.url);
+    const run = ++runId.current;
     setStatus({ kind: "loading" });
     setPrompt(null);
     setCustomPrompt("");
@@ -69,13 +71,15 @@ export function Converter() {
         body: JSON.stringify({ url: check.url }),
       });
       if (!res.ok) throw new Error(String(res.status));
-      setStatus({ kind: "done", doc: await res.json(), sourceUrl: check.url });
+      const doc = await res.json();
+      if (run === runId.current) setStatus({ kind: "done", doc, sourceUrl: check.url });
     } catch {
-      setStatus({ kind: "error" });
+      if (run === runId.current) setStatus({ kind: "error" });
     }
   }
 
   function clearAll() {
+    runId.current++;
     setUrl("");
     setUrlError("");
     setStatus({ kind: "idle" });

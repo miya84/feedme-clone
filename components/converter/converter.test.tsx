@@ -129,3 +129,16 @@ test("변환 중에는 변환 버튼이 비활성화되어 중복 실행을 막�
   fireEvent.submit(screen.getByLabelText("페이지 주소").closest("form")!);
   expect(fetchMock).toHaveBeenCalledTimes(1);
 });
+
+test("변환 중 지우기를 누르면 늦게 도착한 응답이 결과를 되살리지 않는다", async () => {
+  let resolve!: (r: Response) => void;
+  fetchMock.mockImplementation(() => new Promise<Response>((r) => (resolve = r)));
+  render(<Converter />);
+  fireEvent.change(screen.getByLabelText("페이지 주소"), { target: { value: "https://a.com" } });
+  fireEvent.click(screen.getByRole("button", { name: "변환하기" }));
+  fireEvent.click(await screen.findByRole("button", { name: "지우기" }));
+  resolve(Response.json(DOC));
+  await new Promise((r) => setTimeout(r, 50));
+  expect(screen.queryByRole("heading", { level: 2, name: "글 제목" })).not.toBeInTheDocument();
+  expect(screen.getByText("변환한 본문이 여기에 나타납니다")).toBeInTheDocument();
+});
