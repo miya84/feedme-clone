@@ -1,6 +1,7 @@
 import { Converter } from "@/components/converter/converter";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { FileTextIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -12,7 +13,12 @@ export default function Home() {
           </span>
           FeedMe
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-3 text-sm">
+          <Link href="/settings" className="underline-offset-4 hover:underline">
+            설정
+          </Link>
+          <ThemeToggle />
+        </div>
       </header>
       <Converter />
     </main>
