@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 export function ProfileForm({ initialName, userId }: { initialName: string; userId: string }) {
+  const router = useRouter();
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
 
@@ -26,6 +28,7 @@ export function ProfileForm({ initialName, userId }: { initialName: string; user
       return;
     }
     toast.success("저장했습니다");
+    router.push("/");
   }
 
   return (
