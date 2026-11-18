@@ -51,3 +51,19 @@ test("네트워크 오류는 가져오기 실패다", async () => {
   }) as typeof fetch;
   await expect(convertUrl("https://a.com/", boom)).rejects.toBeInstanceOf(ConvertError);
 });
+
+test("셀마다 colspan=1 rowspan=1이 붙은 표(네이버 에디터)도 Markdown 표로 변환한다", async () => {
+  const cell = (t: string) => `<td colspan="1" rowspan="1"><p>${t}</p></td>`;
+  const page = html(
+    `<article><h1>가격표</h1><p>${"소개 ".repeat(60)}</p>
+     <table><tbody>
+       <tr>${cell("<b>용량</b>")}${cell("<b>1개 가격</b>")}</tr>
+       <tr>${cell("2.5mg")}${cell("3,200엔")}</tr>
+     </tbody></table>
+     <p>${"끝 ".repeat(60)}</p></article>`
+  );
+  const r = await convertUrl("https://blog.naver.com/x", okFetch(page));
+  expect(r.body).not.toContain("<table");
+  expect(r.body).toContain("| **용량** | **1개 가격** |");
+  expect(r.body).toContain("| 2.5mg | 3,200엔 |");
+});

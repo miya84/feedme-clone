@@ -22,7 +22,8 @@ export async function convertUrl(
     throw new ConvertError("fetch failed");
   }
 
-  const { document } = parseHTML(html);
+  // 셀마다 붙은 colspan="1" rowspan="1"(네이버 에디터)이 있으면 defuddle이 표를 HTML로 남긴다.
+  const { document } = parseHTML(html.replace(/\s(?:colspan|rowspan)="1"/gi, ""));
   const result = await Defuddle(document, url, { markdown: true });
   const body = (result.content ?? "").trim();
   if (!body) throw new ConvertError("empty body");
